@@ -24,6 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
@@ -64,28 +66,57 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('DB_ENGINE'),
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST'),
-#         'PORT': os.getenv('DB_PORT')
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'postgres'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Authentication
 
 AUTH_USER_MODEL = 'users.User'
+
+DJOSER = {
+    'HIDE_USERS': False,
+    'SERIALIZERS': {
+        # 'activation': 'djoser.serializers.ActivationSerializer',
+        # 'password_reset': 'djoser.serializers.SendEmailResetSerializer',
+        # 'password_reset_confirm': 'djoser.serializers.PasswordResetConfirmSerializer',
+        # 'password_reset_confirm_retype': 'djoser.serializers.PasswordResetConfirmRetypeSerializer',
+        # 'set_password': 'djoser.serializers.SetPasswordSerializer',
+        # 'set_password_retype': 'djoser.serializers.SetPasswordRetypeSerializer',
+        # 'set_username': 'djoser.serializers.SetUsernameSerializer',
+        # 'set_username_retype': 'djoser.serializers.SetUsernameRetypeSerializer',
+        # 'username_reset': 'djoser.serializers.SendEmailResetSerializer',
+        # 'username_reset_confirm': 'djoser.serializers.UsernameResetConfirmSerializer',
+        # 'username_reset_confirm_retype': 'djoser.serializers.UsernameResetConfirmRetypeSerializer',
+        # 'user_create': 'djoser.serializers.UserCreateSerializer',
+        # 'user_create_password_retype': 'djoser.serializers.UserCreatePasswordRetypeSerializer',
+        # 'user_delete': 'djoser.serializers.UserDeleteSerializer',
+        'user': 'api.serializers.UserSerializer',
+        # 'current_user': 'djoser.serializers.UserSerializer',
+        # 'token': 'djoser.serializers.TokenSerializer',
+        # 'token_create': 'djoser.serializers.TokenCreateSerializer',
+    },
+    'PERMISSIONS': {
+        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    }
+        
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -101,7 +132,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -124,3 +154,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES':
+    ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
+}
