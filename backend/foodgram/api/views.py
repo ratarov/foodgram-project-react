@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.serializers import TagSerializer, RecipeSerializer, UserSerializer, IngredientSerializer, ReadSubscriptionSerializer, NewSubscriptionSerializer
+from api.serializers import TagSerializer, UserSerializer, IngredientSerializer, ReadSubscriptionSerializer, NewSubscriptionSerializer, ReadRecipeSerializer, WriteRecipeSerializer
 from api.pagination import PageLimitPagination
 from recipes.models import Recipe, Tag, Ingredient
 from users.models import User, Subscription
@@ -70,4 +70,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return ReadRecipeSerializer
+        return WriteRecipeSerializer
+
+    # def perform_create(self, serializer):
+    #     serializer.save(author=self.request.user)

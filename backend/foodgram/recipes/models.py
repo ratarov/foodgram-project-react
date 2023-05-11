@@ -15,7 +15,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('id',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
 
@@ -71,6 +71,10 @@ class Recipe(models.Model):
         verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(Tag)
+    cooking_time = models.SmallIntegerField(
+        verbose_name='Время приготовления в минутах',
+        validators=[MinValueValidator(1, message='Мин.время - 1 минута')],
+    )
 
     class Meta:
         verbose_name = 'Рецепт'

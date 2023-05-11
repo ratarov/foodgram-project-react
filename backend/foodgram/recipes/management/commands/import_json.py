@@ -3,17 +3,27 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand
 
-from recipes.models import Ingredient
+from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
     help = 'Fills the DB with json-files with ingredients'
 
     def handle(self, *args, **kwargs):
-        with open(Path('data', 'ingredients.json'), encoding='utf-8') as f:
-            reader = json.load(f)
-            ingredients, counter = [], 0
-            for product in reader:
-                ingredients.append(Ingredient(**product))
-                counter += 1
-            Ingredient.objects.bulk_create(ingredients, ignore_conflicts=True)
+        mapping = (
+            ('ingredients.json', Ingredient),
+            ('tags.json', Tag)
+        )
+        for file, model in mapping:
+            self.stdout.write(f'Начинаем импорт из файла {file}')
+            with open(Path('data', file), encoding='utf-8') as f:
+                reader = json.load(f)
+                items, counter = [], 0
+                for attrs in reader:
+                    items.append(model(**attrs))
+                    counter += 1
+                model.objects.bulk_create(items, ignore_conflicts=True)
+                self.stdout.write(
+                    f'Добавлено объектов: {len(reader)}; '
+                    f'строк в документе: {counter}\n'
+                    '-------------------------------------------------')
