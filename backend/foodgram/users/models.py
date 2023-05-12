@@ -1,6 +1,5 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin)
 
 from users.managers import UserManager
@@ -9,18 +8,14 @@ from users.managers import UserManager
 class User(AbstractBaseUser, PermissionsMixin):
     """Customs user model with email for authentication."""
     email = models.EmailField(
-        verbose_name='Email', max_length=255, unique=True,
-    )
+        verbose_name='Email', max_length=255, unique=True)
     username = models.CharField(
         verbose_name='Логин', max_length=150, unique=True,
-        validators=[UnicodeUsernameValidator],
-    )
+        validators=[UnicodeUsernameValidator])
     first_name = models.CharField(
-        verbose_name='Имя', max_length=255,
-    )
+        verbose_name='Имя', max_length=255)
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=255,
-    )
+        verbose_name='Фамилия', max_length=255)
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
 
@@ -30,6 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -54,7 +50,10 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(fields=['follower', 'author'],
-                                    name='unique_subscription')
+                                    name='Уникальная подписка'),
+            models.CheckConstraint(
+                check=~models.Q(author=models.F('follower')),
+                name='Нельзя подписаться на себя'),
         ]
 
     def __str__(self):

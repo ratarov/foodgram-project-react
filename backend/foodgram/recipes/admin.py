@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from recipes.models import Recipe, Ingredient, IngredientPortion, Tag
+from recipes.models import Recipe, Ingredient, IngredientPortion, Tag, Favorite, Cart
 
 
 class IngredientPortionAdmin(admin.TabularInline):
@@ -44,3 +44,23 @@ class RecipeAdmin(admin.ModelAdmin):
     autocomplete_fields = ['tags']
     list_filter = ('author', 'name')
     empty_value_display = '-пусто-'
+
+
+class UserRecipeAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'recipe',
+    )
+    search_fields = ('user', 'recipe')
+    empty_value_display = '-пусто-'
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(UserRecipeAdmin):
+    pass
+
+
+@admin.register(Cart)
+class CartAdmin(UserRecipeAdmin):
+    pass
