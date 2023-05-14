@@ -106,8 +106,8 @@ class Favorite(UserRecipeRelation):
     """Model for m2m relation: User's favorite Recipes."""
 
     class Meta(UserRecipeRelation.Meta):
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранные рецепты'
+        verbose_name = 'Рецепт в избранном'
+        verbose_name_plural = 'Рецепты в избранном'
         default_related_name = 'favorites'
         constraints = (models.UniqueConstraint(
             fields=('user', 'recipe'),
@@ -125,8 +125,8 @@ class Cart(UserRecipeRelation):
     """
 
     class Meta(UserRecipeRelation.Meta):
-        verbose_name = 'Корзина'
-        verbose_name_plural = 'Корзины'
+        verbose_name = 'Рецепт в корзине'
+        verbose_name_plural = 'Рецепты в корзине'
         default_related_name = 'carts'
 
     def __str__(self):

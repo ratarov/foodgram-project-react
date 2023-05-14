@@ -1,6 +1,6 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models.expressions import Case, When
-from django.db.models import BooleanField
+from django_filters import rest_framework as filters
+from django.db.models.aggregates import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status, viewsets
@@ -8,27 +8,22 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.serializers import TagSerializer, UserSerializer, IngredientSerializer, SubscriptionSerializer, ReadRecipeSerializer, WriteRecipeSerializer, ShortRecipeSerializer
+from api.filters import RecipesFilter
+from api.serializers import TagSerializer, IngredientSerializer, SubscriptionSerializer, ReadRecipeSerializer, WriteRecipeSerializer, ShortRecipeSerializer
 from api.pagination import PageLimitPagination
-# from api.validators import validate_favorite
-from recipes.models import Recipe, Tag, Ingredient, Favorite, Cart
+from api.permissions import IsAuthorOrReadOnly
+from recipes.models import Recipe, Tag, Ingredient, IngredientPortion, Favorite, Cart
 from users.models import User, Subscription
 
 
 class UserViewSet(DjoserUserViewSet):
-    """Viewset for users/ endpoints."""
+    """
+    Viewset for users/ endpoints, based on Djoser viewset template.
+    Options: registration, user profile, current user (/me), change password,
+    + subscriptions for other users: add/del/list actions.
+    """
     pagination_class = PageLimitPagination
     queryset = User.objects.all()
-
-    # def get_queryset(self):
-    #     user_subs = self.request.user.follows.values_list(
-    #         'author', flat=True
-    #     ) if self.request.user.is_authenticated else []
-    #     return User.objects.annotate(is_subscribed=Case(
-    #         When(id__in=user_subs, then=True),
-    #         default=False,
-    #         output_field=BooleanField()
-    #     )).prefetch_related('follows')
 
     @action(methods=['GET'], detail=False, url_path='subscriptions')
     def user_subscriptions(self, request):
@@ -41,9 +36,11 @@ class UserViewSet(DjoserUserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['POST', 'DELETE'], detail=True,
-            permission_classes=[IsAuthenticated,])
-    def subscribe(self, request, id):
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated,],
+            url_path='subscribe')
+    def add_del_subscription(self, request, id):
         user = request.user
         author = get_object_or_404(User, id=id)
         subscribed = user.follows.filter(author=author).exists()
@@ -68,40 +65,94 @@ class UserViewSet(DjoserUserViewSet):
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Viewset for tags/ endpoints: list/retrieve actions.
+    Read-only, all changes via admin-panel only.
+    """
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Viewset for ingredients/ endpoints: list/retrieve actions.
+    Read-only, all changes via admin-panel only.
+    """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """
+    Viewset for recipes/ endpoints: standard CRUD actions,
+                                    changes are only for author of object
+    + favorites recipes: add/del actions,
+    + recipes for shopping: add/del actions, download file with unique
+                            list of ingredients.
+    """
     queryset = Recipe.objects.all()
+    permission_classes = [IsAuthorOrReadOnly]
+    pagination_class = PageLimitPagination
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = RecipesFilter
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
             return ReadRecipeSerializer
         return WriteRecipeSerializer
 
-    @action(methods=['POST', 'DELETE'], detail=True,
-            permission_classes=[IsAuthenticated,])
-    def favorite(self, request, pk):
+    def _add_or_del_relation(self, model, request, recipe_id):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        relation_exists = user.favorites.filter(recipe=recipe).exists()
-        if not relation_exists and request.method == 'POST':
-            Favorite.objects.create(user=user, recipe=recipe)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+        rel_exists = model.objects.filter(user=user, recipe=recipe).exists()
+
+        if not rel_exists and request.method == 'POST':
+            model.objects.create(user=user, recipe=recipe)
             return Response(ShortRecipeSerializer(recipe).data,
                             status=status.HTTP_201_CREATED)
 
-        elif relation_exists and request.method == 'DELETE':
-            favorite_recipe = user.favorites.get(recipe=recipe)
-            favorite_recipe.delete()
+        elif rel_exists and request.method == 'DELETE':
+            relation = model.objects.get(user=user, recipe=recipe)
+            relation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        return Response(
-                data={'detail': 'Ошибка запроса'},
-                status=status.HTTP_400_BAD_REQUEST
+        return Response(data={'detail': 'Неверный запрос'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated,],
+            url_path='favorite')
+    def add_del_favorite_recipe(self, request, pk):
+        return self._add_or_del_relation(Favorite, request, pk)
+
+    @action(methods=['POST', 'DELETE'],
+            detail=True,
+            permission_classes=[IsAuthenticated,],
+            url_path='shopping_cart')
+    def add_del_recipe_in_shopping_cart(self, request, pk):
+        return self._add_or_del_relation(Cart, request, pk)
+
+    @action(methods=['GET'],
+            detail=False,
+            permission_classes=[IsAuthenticated,])
+    def download_shopping_cart(self, request):
+        user = request.user
+        ingredients = (IngredientPortion.objects.
+                       filter(recipe__carts__user=user).
+                       values('ingredient__name',
+                              'ingredient__measurement_unit').
+                       annotate(total=Sum('amount')).
+                       order_by('ingredient__name'))
+        shopping_list = [
+            f'Список покупок для {user.first_name} {user.last_name}:']
+        for ingredient in ingredients:
+            shopping_list.append(
+                f"\n - {ingredient['ingredient__name']} "
+                f"({ingredient['ingredient__measurement_unit']}): "
+                f"{ingredient['total']}"
             )
+        filename = 'shopping_list.txt'
+        response = HttpResponse(shopping_list, 'Content-Type: text/plain')
+        response['Content-Disposition'] = f'attachment; filename={filename}'
+        return response
