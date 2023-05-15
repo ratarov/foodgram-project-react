@@ -5,7 +5,6 @@ from recipes.models import Recipe, Ingredient, IngredientPortion, Tag, Favorite,
 
 class IngredientPortionAdmin(admin.TabularInline):
     model = IngredientPortion
-    # fields = ('ingredient.name', 'ingredient.measurement_unit')
 
 
 @admin.register(Tag)

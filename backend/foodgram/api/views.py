@@ -85,6 +85,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = IngredientSearchFilter
+    pagination_class = PageLimitPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -95,7 +96,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     + recipes for shopping: add/del actions, download file with unique
                             list of ingredients.
     """
-    queryset = Recipe.objects.all()
+    queryset = (Recipe.objects.all().
+                select_related('author').
+                prefetch_related('tags', 'portions', 'portions__ingredient'))
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageLimitPagination
     filter_backends = (DjangoFilterBackend,)

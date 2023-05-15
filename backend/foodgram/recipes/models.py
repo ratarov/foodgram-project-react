@@ -1,4 +1,6 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.conf import settings
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 from users.models import User
@@ -25,7 +27,8 @@ class Tag(models.Model):
     name = models.CharField(
         verbose_name='Название', max_length=200, unique=True)
     color = models.CharField(
-        verbose_name='Цветовой HEX-код', max_length=7, unique=True)
+        verbose_name='Цветовой HEX-код', max_length=7, unique=True,
+        validators=[RegexValidator(regex=settings.TAG_REGEX)])
     slug = models.SlugField(
         verbose_name='Slug', max_length=200, unique=True)
 
@@ -52,8 +55,10 @@ class Recipe(models.Model):
     cooking_time = models.SmallIntegerField(
         verbose_name='Время приготовления в минутах',
         validators=[
-            MinValueValidator(1, message='Мин.время готовки - 1 минута'),
-            MaxValueValidator(600, message='Мин.время готовки - 600 минут'),
+            MinValueValidator(settings.MIN_COOK_TIME,
+                              message='Мин.время готовки - 1 минута'),
+            MaxValueValidator(settings.MAX_COOK_TIME,
+                              message='Мин.время готовки - 600 минут'),
         ],
     )
     pub_time = models.DateTimeField(
@@ -78,8 +83,10 @@ class IngredientPortion(models.Model):
     amount = models.SmallIntegerField(
         verbose_name='Количество',
         validators=[
-            MinValueValidator(1, message='Мин.кол-во ингредиента - 1'),
-            MaxValueValidator(1000, message='Мин.кол-во ингредиента - 1000'),
+            MinValueValidator(settings.MIN_INGREDIENT_AMOUNT,
+                              message='Мин.кол-во ингредиента - 1'),
+            MaxValueValidator(settings.MAX_INGREDIENT_AMOUNT,
+                              message='Мин.кол-во ингредиента - 1000'),
         ],
     )
 

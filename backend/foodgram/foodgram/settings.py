@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'djoser',
+    'debug_toolbar',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
@@ -38,6 +39,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = 'foodgram.urls'
@@ -91,24 +93,7 @@ AUTH_USER_MODEL = 'users.User'
 DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        # 'activation': 'djoser.serializers.ActivationSerializer',
-        # 'password_reset': 'djoser.serializers.SendEmailResetSerializer',
-        # 'password_reset_confirm': 'djoser.serializers.PasswordResetConfirmSerializer',
-        # 'password_reset_confirm_retype': 'djoser.serializers.PasswordResetConfirmRetypeSerializer',
-        # 'set_password': 'djoser.serializers.SetPasswordSerializer',
-        # 'set_password_retype': 'djoser.serializers.SetPasswordRetypeSerializer',
-        # 'set_username': 'djoser.serializers.SetUsernameSerializer',
-        # 'set_username_retype': 'djoser.serializers.SetUsernameRetypeSerializer',
-        # 'username_reset': 'djoser.serializers.SendEmailResetSerializer',
-        # 'username_reset_confirm': 'djoser.serializers.UsernameResetConfirmSerializer',
-        # 'username_reset_confirm_retype': 'djoser.serializers.UsernameResetConfirmRetypeSerializer',
-        # 'user_create': 'djoser.serializers.UserCreateSerializer',
-        # 'user_create_password_retype': 'djoser.serializers.UserCreatePasswordRetypeSerializer',
-        # 'user_delete': 'djoser.serializers.UserDeleteSerializer',
         'user': 'api.serializers.UserSerializer',
-        # 'current_user': 'djoser.serializers.UserSerializer',
-        # 'token': 'djoser.serializers.TokenSerializer',
-        # 'token_create': 'djoser.serializers.TokenCreateSerializer',
     },
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
@@ -169,3 +154,17 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     ],
 }
+
+# Constants and reg.expressions
+
+TAG_REGEX = r"^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+MIN_COOK_TIME = 1
+MAX_COOK_TIME = 600
+MIN_INGREDIENT_AMOUNT = 1
+MAX_INGREDIENT_AMOUNT = 1000
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]
