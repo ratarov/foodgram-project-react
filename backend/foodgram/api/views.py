@@ -1,19 +1,22 @@
-from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Sum
-from django.http import FileResponse, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
+from recipes.models import (Cart, Favorite, Ingredient, IngredientPortion,
+                            Recipe, Tag)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.filters import IngredientSearchFilter, RecipesFilter
-from api.serializers import TagSerializer, IngredientSerializer, SubscriptionSerializer, ReadRecipeSerializer, WriteRecipeSerializer, ShortRecipeSerializer
 from api.pagination import PageLimitPagination
 from api.permissions import IsAuthorOrReadOnly
-from recipes.models import Recipe, Tag, Ingredient, IngredientPortion, Favorite, Cart
-from users.models import User, Subscription
+from api.serializers import (IngredientSerializer, ReadRecipeSerializer,
+                             ShortRecipeSerializer, SubscriptionSerializer,
+                             TagSerializer, WriteRecipeSerializer)
+from users.models import Subscription, User
 
 
 class UserViewSet(DjoserUserViewSet):
