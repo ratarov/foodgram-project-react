@@ -1,14 +1,14 @@
-from django_filters import rest_framework as filters
+from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Sum
-from django.http import HttpResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet as DjoserUserViewSet
-from rest_framework import status, viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.filters import RecipesFilter
+from api.filters import IngredientSearchFilter, RecipesFilter
 from api.serializers import TagSerializer, IngredientSerializer, SubscriptionSerializer, ReadRecipeSerializer, WriteRecipeSerializer, ShortRecipeSerializer
 from api.pagination import PageLimitPagination
 from api.permissions import IsAuthorOrReadOnly
@@ -80,6 +80,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filterset_class = IngredientSearchFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -93,7 +95,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageLimitPagination
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipesFilter
 
     def get_serializer_class(self):
