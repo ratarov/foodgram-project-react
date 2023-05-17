@@ -9,7 +9,7 @@ from users.models import User
 class Ingredient(models.Model):
     """Model Ingredients - basic ingredients for recipes."""
     name = models.CharField(
-        verbose_name='Название', max_length=200)
+        verbose_name='Название', max_length=200, db_index=True)
     measurement_unit = models.CharField(
         verbose_name='Единица измерения', max_length=200)
 
