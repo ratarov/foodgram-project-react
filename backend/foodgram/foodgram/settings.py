@@ -8,8 +8,8 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', default='django_super_secret_key!')
-DEBUG = os.getenv('DEBUG', default='True') == 'True'
-ALLOWED_HOSTS = []
+DEBUG = os.getenv('DEBUG') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 # Application definition
@@ -164,7 +164,5 @@ MIN_INGREDIENT_AMOUNT = 1
 MAX_INGREDIENT_AMOUNT = 1000
 
 INTERNAL_IPS = [
-    # ...
     "127.0.0.1",
-    # ...
 ]

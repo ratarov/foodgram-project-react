@@ -1,10 +1,8 @@
-from django.db.models.aggregates import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
-from recipes.models import (Cart, Favorite, Ingredient, IngredientPortion,
-                            Recipe, Tag)
+from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -93,8 +91,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     Viewset for recipes/ endpoints: standard CRUD actions,
                                     changes are only for author of object
     + favorites recipes: add/del actions,
-    + recipes for shopping: add/del actions, download file with unique
-                            list of ingredients.
+    + recipes for shopping: add/del actions, download file with list
+                            of unique ingredients.
     """
     queryset = (Recipe.objects.all().
                 select_related('author').
@@ -129,37 +127,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(methods=['POST', 'DELETE'],
             detail=True,
-            permission_classes=[IsAuthenticated,],
+            permission_classes=[IsAuthenticated],
             url_path='favorite')
     def add_del_favorite_recipe(self, request, pk):
         return self._add_or_del_relation(Favorite, request, pk)
 
     @action(methods=['POST', 'DELETE'],
             detail=True,
-            permission_classes=[IsAuthenticated,],
+            permission_classes=[IsAuthenticated],
             url_path='shopping_cart')
     def add_del_recipe_in_shopping_cart(self, request, pk):
         return self._add_or_del_relation(Cart, request, pk)
 
     @action(methods=['GET'],
             detail=False,
-            permission_classes=[IsAuthenticated,])
+            permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        user = request.user
-        ingredients = (IngredientPortion.objects.
-                       filter(recipe__carts__user=user).
-                       values('ingredient__name',
-                              'ingredient__measurement_unit').
-                       annotate(total=Sum('amount')).
-                       order_by('ingredient__name'))
-        shopping_list = [
-            f'Список покупок для {user.first_name} {user.last_name}:']
-        for ingredient in ingredients:
-            shopping_list.append(
-                f"\n - {ingredient['ingredient__name']} "
-                f"({ingredient['ingredient__measurement_unit']}): "
-                f"{ingredient['total']}"
-            )
+        shopping_list = request.user.get_shopping_list()
         filename = 'shopping_list.txt'
         response = HttpResponse(shopping_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'

@@ -1,5 +1,6 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+from django.db.models.aggregates import Sum
 from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin)
 
 from users.managers import UserManager
@@ -31,6 +32,24 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+    def get_shopping_list(self):
+        ingredients = (self.carts.values(
+                'recipe__ingredients__name',
+                'recipe__ingredients__measurement_unit',
+                'recipe__portions__amount',
+            ).
+            annotate(total=Sum('recipe__portions__amount')).
+            order_by('recipe__ingredients__name'))
+        shopping_list = [f'Список покупок для {self.first_name} '
+                         f'{self.last_name}:']
+        for ingredient in ingredients:
+            shopping_list.append(
+                f"\n - {ingredient['recipe__ingredients__name']} "
+                f"({ingredient['recipe__ingredients__measurement_unit']}): "
+                f"{ingredient['total']}"
+            )
+        return shopping_list
 
 
 class Subscription(models.Model):

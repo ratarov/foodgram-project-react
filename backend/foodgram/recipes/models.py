@@ -84,9 +84,11 @@ class IngredientPortion(models.Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(settings.MIN_INGREDIENT_AMOUNT,
-                              message='Мин.кол-во ингредиента - 1'),
+                              message=('Мин.кол-во ингредиента -'
+                                       f'{settings.MIN_INGREDIENT_AMOUNT}')),
             MaxValueValidator(settings.MAX_INGREDIENT_AMOUNT,
-                              message='Мин.кол-во ингредиента - 1000'),
+                              message=('Мин.кол-во ингредиента - '
+                                       f'{settings.MAX_INGREDIENT_AMOUNT}')),
         ],
     )
 

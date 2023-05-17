@@ -23,14 +23,14 @@ class Command(BaseCommand):
                 self.stderr.write(
                     f'File {file} не найден\n'
                     '-------------------------------------------------')
-                continue    
+                continue
             items, counter = [], 0
             for attrs in reader:
                 try:
                     items.append(model(**attrs))
                     counter += 1
                 except TypeError:
-                    self.stderr.write(f'Ошибка в заполнении фикстур')
+                    self.stderr.write('Ошибка в заполнении фикстур')
                     continue
             model.objects.bulk_create(items, ignore_conflicts=True)
             self.stdout.write(
