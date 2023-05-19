@@ -1,0 +1,10 @@
+[
+    {"id": 100, "email": "semen@mail.ru", "username": "semen", "first_name": "Семен", "last_name": "Семенов"},
+    {"id": 101, "email": "harry@mail.ru", "username": "harry", "first_name": "Гарри", "last_name": "Грязный"},
+    {"id": 102, "email": "harrypotter@mail.ru", "username": "harrypotter", "first_name": "Гарри", "last_name": "Поттер"},
+    {"id": 103, "email": "tyler@mail.ru", "username": "tyler", "first_name": "Тайлер", "last_name": "Дерден"},
+    {"id": 104, "email": "church@mail.ru", "username": "church", "first_name": "Уинстон", "last_name": "Черчилль"},
+    {"id": 105, "email": "komar@mail.ru", "username": "komar", "first_name": "Виктор", "last_name": "Комаров"},
+    {"id": 106, "email": "clooney@mail.ru", "username": "clooney", "first_name": "Джордж", "last_name": "Клуни"},
+    {"id": 107, "email": "wtf@mail.ru", "username": "wtf", "first_name": "Руслан", "last_name": "Тратата"}
+]

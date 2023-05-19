@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -83,7 +84,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = IngredientSearchFilter
-    pagination_class = PageLimitPagination
+    # pagination_class = PageLimitPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -144,7 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         shopping_list = request.user.get_shopping_list()
-        filename = 'shopping_list.txt'
         response = HttpResponse(shopping_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = f'attachment; filename={filename}'
+        response['Content-Disposition'] = ('attachment; filename='
+                                           f'{settings.SHOP_LIST_FILE}')
         return response

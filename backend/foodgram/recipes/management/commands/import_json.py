@@ -4,6 +4,7 @@ from pathlib import Path
 from django.core.management.base import BaseCommand
 
 from recipes.models import Ingredient, Tag
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -12,7 +13,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         mapping = (
             ('ingredients.json', Ingredient),
-            ('tags.json', Tag)
+            ('tags.json', Tag),
+            ('users.json', User),
         )
         for file, model in mapping:
             self.stdout.write(f'Начинаем импорт из файла {file}')
