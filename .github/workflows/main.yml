@@ -59,7 +59,6 @@ jobs:
         script: |
           sudo docker-compose stop
           sudo docker-compose rm backend
-          rm .env
           echo ${{ secrets.ENV_CONTENT }} > .env
           sudo docker-compose up -d
           sudo docker-compose exec -T web python manage.py collectstatic --no-input
