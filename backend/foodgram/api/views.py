@@ -40,7 +40,7 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(methods=['POST', 'DELETE'],
             detail=True,
-            permission_classes=[IsAuthenticated,],
+            permission_classes=[IsAuthenticated],
             url_path='subscribe')
     def add_del_subscription(self, request, id):
         user = request.user
@@ -57,7 +57,7 @@ class UserViewSet(DjoserUserViewSet):
             return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
 
-        elif subscribed and request.method == 'DELETE':
+        if subscribed and request.method == 'DELETE':
             subscription = user.follows.get(author=author)
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -117,7 +117,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(ShortRecipeSerializer(recipe).data,
                             status=status.HTTP_201_CREATED)
 
-        elif rel_exists and request.method == 'DELETE':
+        if rel_exists and request.method == 'DELETE':
             relation = model.objects.get(user=user, recipe=recipe)
             relation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

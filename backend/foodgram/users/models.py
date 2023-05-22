@@ -35,9 +35,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_shopping_list(self):
         ingredients = (self.carts.values(
-                'recipe__ingredients__name',
-                'recipe__ingredients__measurement_unit',
-            ).
+            'recipe__ingredients__name',
+            'recipe__ingredients__measurement_unit',
+        ).
             annotate(total=Sum('recipe__portions__amount')).
             order_by('recipe__ingredients__name'))
         shopping_list = [f'Список покупок для {self.first_name} '
