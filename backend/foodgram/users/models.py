@@ -37,7 +37,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ingredients = (self.carts.values(
                 'recipe__ingredients__name',
                 'recipe__ingredients__measurement_unit',
-                'recipe__portions__amount',
             ).
             annotate(total=Sum('recipe__portions__amount')).
             order_by('recipe__ingredients__name'))
