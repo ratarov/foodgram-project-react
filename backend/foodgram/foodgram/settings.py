@@ -1,15 +1,16 @@
 import os
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.getenv('SECRET_KEY', default='django_super_secret_key!')
-DEBUG = os.getenv('DEBUG') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
+SECRET_KEY = os.getenv('SECRET_KEY', default=get_random_secret_key())
+DEBUG = os.getenv('DEBUG', default='False') == 'True'
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', default='*').split(',')
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1', 'http://localhost']
 
 
