@@ -10,6 +10,7 @@ services:
 
   backend:
     image: ratarov/foodgram_back:latest
+    # build: ../backend/foodgram/
     restart: always
     volumes:
       - static_value:/app/static/
