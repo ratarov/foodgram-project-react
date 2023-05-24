@@ -56,6 +56,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.PASSPHRASE }}
+        tar: --overwrite
         source: "infra/nginx.conf"
         target: /home/${{ secrets.USER }}
     - name: executing remote ssh commands to deploy
