@@ -46,7 +46,7 @@ class RecipeAdmin(admin.ModelAdmin):
     autocomplete_fields = ['tags']
     list_filter = ('author', 'name', 'tags')
     empty_value_display = '-пусто-'
-    
+
     def added_to_favorites(self, obj):
         return obj.favorites.count()
 
