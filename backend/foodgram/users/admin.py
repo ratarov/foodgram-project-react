@@ -13,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
         'last_name',
     )
     search_fields = ('email', 'username')
-    list_filter = ('id',)
+    list_filter = ('email', 'username')
     empty_value_display = '-пусто-'
 
 

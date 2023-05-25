@@ -29,6 +29,7 @@ class IngredientAdmin(admin.ModelAdmin):
         'measurement_unit',
     )
     search_fields = ('name',)
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
@@ -38,12 +39,18 @@ class RecipeAdmin(admin.ModelAdmin):
         'id',
         'author',
         'name',
+        'added_to_favorites',
     )
     inlines = (IngredientPortionAdmin,)
-    search_fields = ('name', 'author', 'tags')
+    search_fields = ('name', 'tags')
     autocomplete_fields = ['tags']
-    list_filter = ('author', 'name')
+    list_filter = ('author', 'name', 'tags')
     empty_value_display = '-пусто-'
+    
+    def added_to_favorites(self, obj):
+        return obj.favorites.count()
+
+    added_to_favorites.short_description = 'В избранном'
 
 
 class UserRecipeAdmin(admin.ModelAdmin):
