@@ -1,10 +1,6 @@
 # FOODGRAM
 ## Yandex Practicum Python-Backend course Diploma
 [![foodgram-app workflow](https://github.com/ratarov/foodgram-project-react/actions/workflows/main.yml/badge.svg)](https://github.com/ratarov/foodgram-project-react/actions/workflows/main.yml)
-### Data for review
-http://51.250.31.223/
-admin login: admin@mail.ru
-admin pass: Letmein-123
 ### Description
 Web-service for sharing cooking recipes with its own API, frontend, PostgreSQL database in Docker containers with set-up CI_CD workflows. Features:
  - register users, follow other users - authors of recipes;
